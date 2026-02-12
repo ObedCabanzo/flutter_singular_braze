@@ -49,10 +49,10 @@ import singular_flutter_sdk
       binaryMessenger: controller.binaryMessenger
     )
 
-  deepLinkChannel = FlutterMethodChannel(
-    name: "com.example.flutter_singular/deeplinks",
-    binaryMessenger: controller.binaryMessenger
-  )
+    deepLinkChannel = FlutterMethodChannel(
+      name: "com.example.flutter_singular/deeplinks",
+      binaryMessenger: controller.binaryMessenger
+    )
 
     permissionChannel?.setMethodCallHandler { [weak self] (call, result) in
       if call.method == "requestNotificationPermission" {
@@ -165,7 +165,9 @@ import singular_flutter_sdk
   }
 
   override func application(
-    _ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    _ app: UIApplication,
+    open url: URL, 
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     print("App opened with URL: \(url.absoluteString)")
     forwardURLToSingularBridge(url, options: options)
@@ -220,7 +222,7 @@ import singular_flutter_sdk
 
     print("=> [BrazeDelegate] shouldOpenURL: \(urlString)")
 
-    if urlString.contains("obed.lat") {
+    if urlString.contains("obed.lat") || urlString.contains("minders.sng.link")  {
       forwardURLToSingularBridge(url, options: [:])
       return false
     } 

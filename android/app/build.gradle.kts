@@ -55,7 +55,9 @@ dependencies {
   implementation("com.google.firebase:firebase-analytics")
 
  
- implementation("com.google.firebase:firebase-messaging:+")
+   implementation("com.google.firebase:firebase-messaging:+")
+//    implementation ("com.braze:android-sdk-ui:41.0.+")
+//    implementation ("com.braze:android-sdk-location:41.0.+")
   // Add the dependencies for any other desired Firebase products
   // https://firebase.google.com/docs/android/setup#available-libraries
 }

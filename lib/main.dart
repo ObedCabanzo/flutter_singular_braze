@@ -38,6 +38,7 @@ void main() {
     ['/profile', '/app/profile'],
   ];
   config.espDomains = ['obed.lat', 'sng.link'];
+  config.sessionTimeout = 2;
   config.singularLinksHandler = (SingularLinkParams params) {
     String? deeplink = params.deeplink;
     String? passthrough = params.passthrough;
