@@ -1,0 +1,146 @@
+FlutterView implements focusItemsInRect: - caching for linear focus movement is limited as long as this view is on screen.
+flutter: The Dart VM service is listening on http://127.0.0.1:63325/fncD49j6NJk=/
+Initializing Braze SDK 13.3.0 with configuration:
+- api
+  - key: 3fe9eb2b-0553-41ce-ad92-8db1febe0533
+  - endpoint: https://sdk.iad-06.braze.com
+  - requestPolicy: automatic
+  - flushInterval: 10.0
+  - sdkAuthentication: false
+  - sdkMetadata: ["flutter"]
+  - trackingPropertyAllowList: []
+- push
+  - appGroup: nil
+  - automation (disabled)
+- location (disabled)
+- logger
+  - level: .info
+  - signposts: false
+  - print: default
+- sessionTimeout: 10.0
+- triggerMinimumTimeInterval: 30.0
+- useUUIDAsDeviceId: true
+- forwardUniversalLinks: true
+- optInWhenPushAuthorized: true
+- tvOSPersistedSizeLimit: 131072
+- preventInAppMessageDisplayForDifferentUser: false
+Unable to retrieve entitlements from simulator executable.
+- feature: universal links forwarding
+- reason: Simulator binaries are not signed or are signed but may not contain all entitlements
+- workaround: Include your application '.entitlements' file in the application bundle, see 'Braze.Configuration.forwardUniversalLinks'.
+Unable to automatically detect APNs environment from executable. Defaulting to `development`.
+Device token registered with APNs: 80 bytes
+Ended user session (id: B5203ECD-26B9-4965-A956-B5949ECE1F1A, duration: 27s).
+Started user session (id: 75765D13-2AD5-4D9A-8606-4175017E6C3B).
+Skipping data flush: no new data to flush.
+flutter: Singular Configured with User ID: usuario_test_ios
+flutter: Deep link channel initialized
+Current user is already identified as "usuario_test_ios".
+- location: braze_plugin/BrazePlugin.swift:47
+- function: changeUser(userId:sdkAuthSignature:fileID:line:)
+- parameter: userId
+everything is null
+No matching trigger for event.
+- event: open
+Processing push notification:
+- date: 2026-02-17 21:44:53 +0000
+- silent: false
+- userInfo: {
+  "ab" : {
+    "c" : "dGVzdF90ZXN0X2RpPTY5OTRlMTUyZDJjMTdmYjk4MTk1OWJmZmVlNzhiNGNi"
+  },
+  "ab_push_fetch_test_triggers_key" : 1,
+  "aps" : {
+    "alert" : "Tap to see Test In-App Message"
+  }
+}
+No matching trigger for event.
+- event: event(BrazeKit.Events.Event(userId: Optional("usuario_test_ios"), sessionId: 75765D13-2AD5-4D9A-8606-4175017E6C3B, time: 2026-02-17 21:44:53 +0000, data: BrazeKit.Events.Event.Data.pushClick(campaignId: (campaignId: test, raw: dGVzdF9...zhiNGNi))))
+In-app message ready for display:
+- triggerId: (campaignId: 6994e152ac996c0063f90c15, raw: Njk5NGU...3Rlc3Q=)
+- userId: usuario_test_ios
+- extras: {
+
+}
+No matching trigger for event.
+- event: event(BrazeKit.Events.Event(userId: Optional("usuario_test_ios"), sessionId: 75765D13-2AD5-4D9A-8606-4175017E6C3B, time: 2026-02-17 21:44:55 +0000, data: BrazeKit.Events.Event.Data.inAppMessageButtonClick(triggerIds: [(campaignId: 6994e152ac996c0063f90c15, raw: Njk5NGU...3Rlc3Q=)], buttonId: "0")))
+=> [BrazeDelegate] shouldOpenURL: https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest&_smtype=3
+URL Delegated to Singular: https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest&_smtype=3
+flutter: Singular Deeplink Handler:
+flutter:    Deeplink: profile
+flutter:    Passthrough: null
+flutter:    Is Deferred: false
+flutter:    URL Parameters: {_dl: profile, pcn: SingularTest, _smtype: 3}
+flutter: Handling deeplink from singular: profile
+flutter: Parsed deeplink:
+flutter:    Scheme:
+flutter:    Host:
+flutter:    Path: profile
+flutter:    All Params: {_dl: profile, pcn: SingularTest, _smtype: 3}
+flutter: Target path for navigation: /profile
+
+----------------------------------------------------------------------
+// ESto no es parte de los logs -> URL SI MANEJADA
+----------------------------------------------------------------------
+
+Processing push notification:
+- date: 2026-02-17 21:45:02 +0000
+- silent: false
+- userInfo: {
+  "ab" : {
+    "c" : "dGVzdF90ZXN0X2RpPTY5OTRlMTViYTA2MzQwOWUxNmE1YTgyMTBjYWE0YWFl"
+  },
+  "ab_push_fetch_test_triggers_key" : 1,
+  "aps" : {
+    "alert" : "Tap to see Test In-App Message"
+  }
+}
+No matching trigger for event.
+- event: event(BrazeKit.Events.Event(userId: Optional("usuario_test_ios"), sessionId: 75765D13-2AD5-4D9A-8606-4175017E6C3B, time: 2026-02-17 21:45:02 +0000, data: BrazeKit.Events.Event.Data.pushClick(campaignId: (campaignId: test, raw: dGVzdF9...WE0YWFl))))
+In-app message ready for display:
+- triggerId: (campaignId: 6994e15bab8ee90063e20981, raw: Njk5NGU...3Rlc3Q=)
+- userId: usuario_test_ios
+- extras: {
+
+}
+No matching trigger for event.
+- event: event(BrazeKit.Events.Event(userId: Optional("usuario_test_ios"), sessionId: 75765D13-2AD5-4D9A-8606-4175017E6C3B, time: 2026-02-17 21:45:03 +0000, data: BrazeKit.Events.Event.Data.inAppMessageButtonClick(triggerIds: [(campaignId: 6994e15bab8ee90063e20981, raw: Njk5NGU...3Rlc3Q=)], buttonId: "0")))
+=> [BrazeDelegate] shouldOpenURL: https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest&_smtype=3
+URL Delegated to Singular: https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest&_smtype=3
+
+----------------------------------------------------------------------
+// ESto no es parte de los logs -> URL NO MANEJADA
+----------------------------------------------------------------------
+
+Processing push notification:
+- date: 2026-02-17 21:45:14 +0000
+- silent: false
+- userInfo: {
+  "ab" : {
+    "c" : "dGVzdF90ZXN0X2RpPTY5OTRlMTY4NDMyNmNlZTIzM2ZiMTVlOTQ4MTJmZjU0"
+  },
+  "ab_push_fetch_test_triggers_key" : 1,
+  "aps" : {
+    "alert" : "Tap to see Test In-App Message"
+  }
+}
+No matching trigger for event.
+- event: event(BrazeKit.Events.Event(userId: Optional("usuario_test_ios"), sessionId: 75765D13-2AD5-4D9A-8606-4175017E6C3B, time: 2026-02-17 21:45:14 +0000, data: BrazeKit.Events.Event.Data.pushClick(campaignId: (campaignId: test, raw: dGVzdF9...TJmZjU0))))
+In-app message ready for display:
+- triggerId: (campaignId: 6994e168254afa0063bf9dc6, raw: Njk5NGU...3Rlc3Q=)
+- userId: usuario_test_ios
+- extras: {
+
+}
+
+
+
+
+No matching trigger for event.
+- event: event(BrazeKit.Events.Event(userId: Optional("usuario_test_ios"), sessionId: 75765D13-2AD5-4D9A-8606-4175017E6C3B, time: 2026-02-17 21:45:15 +0000, data: BrazeKit.Events.Event.Data.inAppMessageButtonClick(triggerIds: [(campaignId: 6994e168254afa0063bf9dc6, raw: Njk5NGU...3Rlc3Q=)], buttonId: "0")))
+=> [BrazeDelegate] shouldOpenURL: https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest&_smtype=3
+URL Delegated to Singular: https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest&_smtype=3
+
+----------------------------------------------------------------------
+// ESto no es parte de los logs -> URL NO MANEJADA
+----------------------------------------------------------------------

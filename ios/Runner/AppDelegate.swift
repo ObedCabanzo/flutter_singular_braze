@@ -17,6 +17,7 @@ import singular_flutter_sdk
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+
     if let singularAppDelegate = SingularAppDelegate.shared() {
       singularAppDelegate.launchOptions = launchOptions
     }
@@ -39,6 +40,7 @@ import singular_flutter_sdk
     let inAppMessageUI = BrazeInAppMessageUI()
     braze.inAppMessagePresenter = inAppMessageUI
 
+    application.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()
     center.setNotificationCategories(Braze.Notifications.categories)
     center.delegate = self
@@ -85,10 +87,7 @@ import singular_flutter_sdk
 
         print("Notification permission granted: \(granted)")
 
-        if granted {
-          // Registrar para notificaciones remotas
-          UIApplication.shared.registerForRemoteNotifications()
-        }
+        UIApplication.shared.registerForRemoteNotifications()
 
         result(granted)
       }
@@ -100,7 +99,7 @@ import singular_flutter_sdk
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
-    print("Device token registered with APNs")
+    print("Device token registered with APNs: \(deviceToken)")
     AppDelegate.braze?.notifications.register(deviceToken: deviceToken)
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
@@ -119,6 +118,8 @@ import singular_flutter_sdk
     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
   ) {
+    // print url
+    print(" <did-receive-remote-notification>  ", )
     if let braze = AppDelegate.braze,
       braze.notifications.handleBackgroundNotification(
         userInfo: userInfo,
@@ -153,27 +154,28 @@ import singular_flutter_sdk
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
+    // Let Braze process the notification payload
     if let braze = AppDelegate.braze {
       braze.notifications.handleForegroundNotification(notification: notification)
     }
-
+    
+    // Control how the notification appears in the foreground
     if #available(iOS 14.0, *) {
-      completionHandler([.list, .banner])
+      completionHandler([.banner, .list, .sound])
     } else {
-      completionHandler([.alert])
+      completionHandler([.alert, .sound])
     }
   }
 
   override func application(
     _ app: UIApplication,
-    open url: URL, 
+    open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     print("App opened with URL: \(url.absoluteString)")
     forwardURLToSingularBridge(url, options: options)
     return true
   }
-
 
   // Universal Links
 
@@ -182,7 +184,9 @@ import singular_flutter_sdk
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {
-
+    if let singularAppDelegate = SingularAppDelegate.shared() {
+      singularAppDelegate.continueUserActivity(userActivity, restorationHandler: nil)
+    }
     print("continue userActivity called")
     print("   Activity type: \(userActivity.activityType)")
 
@@ -190,22 +194,8 @@ import singular_flutter_sdk
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
       let url = userActivity.webpageURL
     {
-
-      print("   URL: \(url.absoluteString)")
-      if let braze = AppDelegate.braze {
-        // Braze procesará el link y disparará su delegate si está configurado
-        // Esto permite que el deep link se maneje dentro de la app
-      }
-
-      // También forward a Singular para attribution
       forwardURLToSingularBridge(url, options: [:])
-
       return true
-    }
-
-    // Si no es browsing web, delegar a Singular
-    if let singularAppDelegate = SingularAppDelegate.shared() {
-      singularAppDelegate.continueUserActivity(userActivity, restorationHandler: nil)
     }
 
     // Llamar al super para mantener compatibilidad con Flutter
@@ -222,10 +212,10 @@ import singular_flutter_sdk
 
     print("=> [BrazeDelegate] shouldOpenURL: \(urlString)")
 
-    if urlString.contains("obed.lat") || urlString.contains("minders.sng.link")  {
+    if urlString.contains("obed.lat") || urlString.contains("minders.sng.link") {
       forwardURLToSingularBridge(url, options: [:])
       return false
-    } 
+    }
 
     return true
   }
@@ -235,7 +225,7 @@ import singular_flutter_sdk
       print("URL Delegated to Singular: \(url.absoluteString)")
       singularAppDelegate.handleOpen(url, options: options)
     }
-    //forwardDeepLinkToFlutter(url)
+    forwardDeepLinkToFlutter(url)
   }
 
   private func forwardDeepLinkToFlutter(_ url: URL) {

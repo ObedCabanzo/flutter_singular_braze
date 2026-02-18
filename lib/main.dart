@@ -24,10 +24,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   BrazePlugin braze = BrazePlugin();
   braze.changeUser(obtenerIdentificadorPorPlataforma());
-  
+
   SingularConfig config = SingularConfig(
     'minders_6abd2f15',
     'cd99416ad34e47acc1a79d2e22fe3f93',
@@ -37,69 +37,46 @@ void main() {
     ['/products', '/app/products'],
     ['/profile', '/app/profile'],
   ];
+
   config.espDomains = ['obed.lat', 'sng.link'];
   config.sessionTimeout = 2;
-  config.singularLinksHandler = (SingularLinkParams params) {
-    String? deeplink = params.deeplink;
-    String? passthrough = params.passthrough;
-    bool? isDeferred = params.isDeferred;
-    Map? urlParameters = params.urlParameters;
 
-    print('Singular Deeplink Handler:');
-    print('   Deeplink: $deeplink');
-    print('   Passthrough: $passthrough');
-    print('   Is Deferred: $isDeferred');  
-    print('   URL Parameters: $urlParameters');
-
-    if (deeplink != null) {
-      _handleDeeplink(deeplink, urlParameters, source: 'singular');
-    }
-  };
-  
   config.customUserId = obtenerIdentificadorPorPlataforma();
-  print("Singular Configured with User ID: ${config.customUserId}");
+  print(
+    "<singular-config> Singular Configured with User ID: ${config.customUserId}",
+  );
   Singular.start(config);
-
   _setupDeepLinkChannel();
-
   runApp(const MyApp());
 }
 
 void _setupDeepLinkChannel() {
-  const MethodChannel channel = 
-      MethodChannel('com.example.flutter_singular/deeplinks');
-  
+  const MethodChannel channel = MethodChannel(
+    'com.example.flutter_singular/deeplinks',
+  );
+
   channel.setMethodCallHandler((MethodCall call) async {
     if (call.method == 'onDeepLink') {
       final data = Map<String, dynamic>.from(call.arguments);
-      
+
       final url = data['url'] as String;
-      final scheme = data['scheme'] as String;
-      final host = data['host'] as String;
-      final path = data['path'] as String;
       final queryParams = Map<String, String>.from(data['queryParams'] ?? {});
-      
-      print('Deep link received from native:');
-      print('   URL: $url');
-      print('   Scheme: $scheme');
-      print('   Host: $host');
-      print('   Path: $path');
-      print('   Query params: $queryParams');
-      
+
+      print('<deeplink-channel> Deep link received from native: $url');
       _handleDeeplink(url, queryParams, source: 'native');
     }
   });
-  
-  print('Deep link channel initialized');
+
+  print('<deeplink-channel> Deep link channel initialized');
 }
 
 void _handleDeeplink(
-  String deeplink, 
-  Map? params, 
-  {String source = 'unknown'}
-) {
-  print('Handling deeplink from $source: $deeplink');
-  
+  String deeplink,
+  Map? params, {
+  String source = 'unknown',
+}) {
+  print('<deeplink-handler> Handling deeplink from $source: $deeplink');
+
   Future.delayed(const Duration(milliseconds: 500), () {
     final context = navigatorKey.currentContext;
     if (context == null) {
@@ -108,107 +85,104 @@ void _handleDeeplink(
     }
 
     Uri uri = Uri.parse(deeplink);
-    String scheme = uri.scheme;
-    String host = uri.host;
-    String path = uri.path;
-    
+
     // Combinar parámetros de la URL con los que vienen en params
     Map<String, dynamic> allParams = {
       ...uri.queryParameters,
       if (params != null) ...params,
     };
 
-    print('Parsed deeplink:');
-    print('   Scheme: $scheme');
-    print('   Host: $host');
-    print('   Path: $path');
+    print('<deeplink-handler> Parsed deeplink:');
+    print('   URL: $deeplink');
     print('   All Params: $allParams');
 
-    // Normalizar el path dependiendo del esquema
+    // Determinar el target path según el tipo de link
     String targetPath = '';
-    
-    if (scheme == 'https' || scheme == 'http') {
-      // Universal link: https://flutter-singular.obed.lat/app/profile
-      // Extraer el path después de /app/
-      if (path.startsWith('/app/')) {
-        targetPath = path.replaceFirst('/app/', '/');
-      } else if (path.startsWith('/app')) {
-        targetPath = path.replaceFirst('/app', '/');
-      } else {
-        targetPath = path;
-      }
-    } else {
-      // Custom scheme: flutter-singular://app/profile
-      // El host es "app" y el path es "/profile"
-      if (host == 'app') {
-        targetPath = path;
-      } else {
-        targetPath = '/$host$path';
-      }
+
+    // Caso 1: Singular tracking link (sng.link) → leer _dl
+    // https://minders.sng.link/Epvpj/w4x1?_dl=profile&pcn=SingularTest
+    if (uri.host.contains('sng.link')) {
+      targetPath = allParams['_dl']?.toString() ?? '';
+    }
+    // Caso 2: Universal link directo
+    // https://flutter-singular.obed.lat/profile
+    else {
+      targetPath = uri.path;
     }
 
-    // Asegurar que el path empiece con /
+    // Normalizar: quitar /app/ prefix si existe y asegurar que empiece con /
+    targetPath = targetPath.replaceFirst(RegExp(r'^/app/?'), '/');
     if (!targetPath.startsWith('/')) {
       targetPath = '/$targetPath';
     }
 
-    print('Target path for navigation: $targetPath');
+    print('<deeplink-handler> Target path for navigation: $targetPath');
 
-    // Ruta: /profile
-    if (targetPath.contains('/profile')) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProfileScreen(
-            userId: allParams['user_id']?.toString() ?? 
-                    allParams['userId']?.toString() ?? 
-                    'default',
-          ),
+    _navigateToPath(context, targetPath, allParams, source, deeplink);
+  });
+}
+
+void _navigateToPath(
+  BuildContext context,
+  String targetPath,
+  Map<String, dynamic> allParams,
+  String source,
+  String originalUrl,
+) {
+  // /profile
+  if (targetPath.contains('/profile')) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileScreen(
+          userId:
+              allParams['user_id']?.toString() ??
+              allParams['userId']?.toString() ??
+              'default',
         ),
-      );
-      Singular.eventWithArgs("Deeplink Profile Opened", {
-        "source": source,
-        "user_id": allParams['user_id']?.toString() ?? 'default',
-      });
-      return;
-    }
-
-    // Ruta: /products
-    if (targetPath.contains('/products')) {
-      String? productId = allParams['product_id']?.toString() ?? 
-                         allParams['productId']?.toString();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProductsScreen(productId: productId),
-        ),
-      );
-      Singular.eventWithArgs("Deeplink Products Opened", {
-        "source": source,
-        "product_id": productId ?? 'none',
-      });
-      return;
-    }
-
-    // Ruta: /settings
-    if (targetPath.contains('/settings')) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SettingsScreen()),
-      );
-      Singular.eventWithArgs("Deeplink Settings Opened", {
-        "source": source,
-      });
-      return;
-    }
-
-    // Si no coincide con ninguna ruta conocida
-    print('WARNING: Unhandled deeplink path: $targetPath');
-    Singular.eventWithArgs("Deeplink Unhandled", {
+      ),
+    );
+    Singular.eventWithArgs("Deeplink Profile Opened", {
       "source": source,
-      "path": targetPath,
-      "original_url": deeplink,
+      "user_id": allParams['user_id']?.toString() ?? 'default',
     });
+    return;
+  }
+
+  // /products
+  if (targetPath.contains('/products')) {
+    String? productId =
+        allParams['product_id']?.toString() ??
+        allParams['productId']?.toString();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductsScreen(productId: productId),
+      ),
+    );
+    Singular.eventWithArgs("Deeplink Products Opened", {
+      "source": source,
+      "product_id": productId ?? 'none',
+    });
+    return;
+  }
+
+  // /settings
+  if (targetPath.contains('/settings')) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+    Singular.eventWithArgs("Deeplink Settings Opened", {"source": source});
+    return;
+  }
+
+  // Unhandled
+  print('<deeplink-handler> WARNING: Unhandled deeplink path: $targetPath');
+  Singular.eventWithArgs("Deeplink Unhandled", {
+    "source": source,
+    "path": targetPath,
+    "original_url": originalUrl,
   });
 }
 
@@ -279,14 +253,8 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _currentIndex,
         onTap: _onTabSelected,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Counter',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Counter'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
             label: 'Products',
@@ -322,10 +290,7 @@ class _CounterTabState extends State<CounterTab> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           const Text('You have pushed the button this many times:'),
-          Text(
-            '$_counter',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 20),
           FloatingActionButton(
             onPressed: _incrementCounter,
