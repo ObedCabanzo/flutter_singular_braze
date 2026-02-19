@@ -47,6 +47,8 @@ class MainActivity : FlutterActivity() {
         handleDeepLink(intent)
     }
 
+    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // El intent se procesará en configureFlutterEngine cuando Flutter esté listo

@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:braze_plugin/braze_plugin.dart';
-import 'package:singular_flutter_sdk/singular_link_params.dart';
 import 'dart:io' show Platform;
 import 'screens/settings.dart';
 import 'screens/profile.dart';
@@ -21,13 +22,45 @@ String obtenerIdentificadorPorPlataforma() {
 
 // GlobalKey para navegación desde deeplinks
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
+late final StreamSubscription pushEventsStreamSubscription;
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  singularInit();
+  brazeInit();
+  _setupDeepLinkChannel();
+  runApp(const MyApp());
+}
 
+void brazeInit() {
   BrazePlugin braze = BrazePlugin();
   braze.changeUser(obtenerIdentificadorPorPlataforma());
+  
 
+  pushEventsStreamSubscription = braze.subscribeToPushNotificationEvents((
+    BrazePushEvent pushEvent,
+  ) {
+    print(
+      "<braze-suscription> Push Notification event of type ${pushEvent.payloadType} seen. Title ${pushEvent.title}\n and deeplink ${pushEvent.url}",
+    );
+    if (pushEvent.payloadType == "push_opened") {
+      if (Platform.isIOS) {
+        print(
+          "<braze-suscription> Handling push notification with Singular for iOS: ${pushEvent.ios}",
+        );
+        Singular.handlePushNotification(pushEvent.ios);
+      } else if (Platform.isAndroid) {
+        print(
+          "<braze-suscription> Handling push notification with Singular for Android: ${pushEvent.android}",
+        );
+        Singular.handlePushNotification(pushEvent.android);
+      } else {
+        return;
+      }
+    }
+  });
+}
+
+void singularInit() {
   SingularConfig config = SingularConfig(
     'minders_6abd2f15',
     'cd99416ad34e47acc1a79d2e22fe3f93',
@@ -46,8 +79,6 @@ void main() {
     "<singular-config> Singular Configured with User ID: ${config.customUserId}",
   );
   Singular.start(config);
-  _setupDeepLinkChannel();
-  runApp(const MyApp());
 }
 
 void _setupDeepLinkChannel() {

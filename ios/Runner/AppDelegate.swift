@@ -36,6 +36,10 @@ import singular_flutter_sdk
 
     braze.delegate = self
 
+    let cancellable = AppDelegate.braze?.notifications.subscribeToUpdates(payloadTypes: [.opened, .received]) { payload in
+      print("Braze processed notification with title '\(payload.title)' and body '\(payload.body)'")
+    }
+
     // InAppMessage UI
     let inAppMessageUI = BrazeInAppMessageUI()
     braze.inAppMessagePresenter = inAppMessageUI
@@ -187,10 +191,8 @@ import singular_flutter_sdk
     if let singularAppDelegate = SingularAppDelegate.shared() {
       singularAppDelegate.continueUserActivity(userActivity, restorationHandler: nil)
     }
-    print("continue userActivity called")
     print("   Activity type: \(userActivity.activityType)")
 
-    // Primero, intentar que Braze maneje el universal link
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
       let url = userActivity.webpageURL
     {
@@ -198,7 +200,6 @@ import singular_flutter_sdk
       return true
     }
 
-    // Llamar al super para mantener compatibilidad con Flutter
     return super.application(
       application,
       continue: userActivity,
@@ -209,9 +210,7 @@ import singular_flutter_sdk
   func braze(_ braze: Braze, shouldOpenURL context: Braze.URLContext) -> Bool {
     let url = context.url
     let urlString = url.absoluteString
-
     print("=> [BrazeDelegate] shouldOpenURL: \(urlString)")
-
     if urlString.contains("obed.lat") || urlString.contains("minders.sng.link") {
       forwardURLToSingularBridge(url, options: [:])
       return false
