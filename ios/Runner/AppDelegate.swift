@@ -11,6 +11,7 @@ import singular_flutter_sdk
   static var braze: Braze? = nil
   private var permissionChannel: FlutterMethodChannel?
   private var deepLinkChannel: FlutterMethodChannel?
+  var pushEventsSubscription: Braze.Cancellable?
 
   override func application(
     _ application: UIApplication,
@@ -36,8 +37,16 @@ import singular_flutter_sdk
 
     braze.delegate = self
 
-    let cancellable = AppDelegate.braze?.notifications.subscribeToUpdates(payloadTypes: [.opened, .received]) { payload in
-      print("Braze processed notification with title '\(payload.title)' and body '\(payload.body)'")
+    pushEventsSubscription = braze.notifications.subscribeToUpdates { payload in
+      print(
+        """
+        => [Push Event Subscription] Received push event:
+           - type: \(payload.type)
+           - title: \(payload.title ?? "<empty>")
+           - isSilent: \(payload.isSilent)
+        """
+      )
+      BrazePlugin.processPushEvent(payload)
     }
 
     // InAppMessage UI

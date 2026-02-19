@@ -22,7 +22,7 @@ String obtenerIdentificadorPorPlataforma() {
 
 // GlobalKey para navegación desde deeplinks
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-late final StreamSubscription pushEventsStreamSubscription;
+late StreamSubscription pushEventsStreamSubscription;
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   singularInit();
@@ -34,7 +34,6 @@ void main() {
 void brazeInit() {
   BrazePlugin braze = BrazePlugin();
   braze.changeUser(obtenerIdentificadorPorPlataforma());
-  
 
   pushEventsStreamSubscription = braze.subscribeToPushNotificationEvents((
     BrazePushEvent pushEvent,
@@ -67,12 +66,12 @@ void singularInit() {
   );
 
   config.pushNotificationsLinkPaths = [
-    ['/products', '/app/products'],
-    ['/profile', '/app/profile'],
+    ['sng_link'],
+    ['data', 'url'],
+    ['rootObj', 'nestedObj', 'singularLink'],
   ];
 
-  config.espDomains = ['obed.lat', 'sng.link'];
-  config.sessionTimeout = 2;
+  config.espDomains = ['obed.lat', 'sng.link', 'sng_link'];
 
   config.customUserId = obtenerIdentificadorPorPlataforma();
   print(
