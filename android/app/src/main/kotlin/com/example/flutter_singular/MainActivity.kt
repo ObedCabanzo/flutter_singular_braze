@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -42,12 +43,10 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             DEEPLINK_CHANNEL
         )
-        
+        Log.d("FlutterEngine", "Intent processed in configureFlutterEngine: " + intent.data);
         // Procesar intent pendiente después de que Flutter está listo
         handleDeepLink(intent)
-    }
-
-    
+    }    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +79,7 @@ class MainActivity : FlutterActivity() {
     }
 
    private fun sendDeepLinkToFlutter(uri: Uri) {
+        Log.d("FlutterEngine", "Sending deep link to Flutter: " + uri.toString())
         val data = mapOf(
             "url" to uri.toString(),
             "scheme" to (uri.scheme ?: ""),
@@ -91,6 +91,7 @@ class MainActivity : FlutterActivity() {
         )
 
         try {
+            Log.d("FlutterEngine", "Invoking deep link method channel with data: " + data.toString())
             deepLinkMethodChannel?.invokeMethod("onDeepLink", data)
         } catch (e: Exception) {
             window.decorView.postDelayed({
